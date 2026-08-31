@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <div class="clock" aria-live="polite">
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">Monday, January 1, 2024</div>
+        </div>
+
+        <script>
+            const timeEl = document.getElementById('time');
+            const dateEl = document.getElementById('date');
+
+            function updateClock() {
+                const now = new Date();
+
+                timeEl.textContent = now.toLocaleTimeString('en-GB', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                dateEl.textContent = now.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000);
+        </script>
+
+        <style>
+            :root {
+                --bg-1: #061018;
+                --bg-2: #0d1f2a;
+                --panel: rgba(10, 22, 30, 0.65);
+                --line: rgba(136, 244, 255, 0.25);
+                --text: #ebfbff;
+                --muted: rgba(214, 240, 252, 0.72);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+                background:
+                    radial-gradient(circle at center, rgba(26, 89, 104, 0.55), transparent 28%),
+                    linear-gradient(135deg, var(--bg-1), var(--bg-2));
+                color: var(--text);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                overflow: hidden;
+            }
+
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                background: linear-gradient(
+                    90deg,
+                    rgba(255,255,255,0.04),
+                    transparent 20%,
+                    transparent 80%,
+                    rgba(255,255,255,0.04)
+                );
+                transform: scaleY(1.2);
+            }
+
+            .clock {
+                position: relative;
+                width: min(90vw, 560px);
+                padding: 2.2rem 2.5rem 1.8rem;
+                border: 1px solid var(--line);
+                border-radius: 28px;
+                background: rgba(10, 22, 30, 0.65);
+                backdrop-filter: blur(10px);
+                box-shadow:
+                    0 0 0 1px rgba(255,255,255,0.04),
+                    0 20px 50px rgba(0, 0, 0, 0.45),
+                    inset 0 0 30px rgba(120, 223, 255, 0.08),
+                    0 0 22px rgba(115, 214, 255, 0.16);
+                text-align: center;
+            }
+
+            .clock::before {
+                content: '';
+                position: absolute;
+                inset: 10px;
+                border: 1px solid rgba(182, 250, 255, 0.15);
+                border-radius: 20px;
+            }
+
+            .time {
+                position: relative;
+                z-index: 1;
+                font-size: clamp(2.6rem, 7vw, 5.4rem);
+                font-weight: 600;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                text-shadow:
+                    0 0 10px rgba(147, 234, 255, 0.7),
+                    0 0 20px rgba(103, 214, 255, 0.5);
+            }
+
+            .date {
+                position: relative;
+                z-index: 1;
+                margin-top: 0.8rem;
+                font-size: 0.8rem;
+                letter-spacing: 0.32em;
+                text-transform: uppercase;
+                color: var(--muted);
+                text-shadow: 0 0 12px rgba(151, 224, 255, 0.35);
+            }
+
+            @media (max-width: 600px) {
+                .clock {
+                    padding: 1.8rem 1.4rem 1.5rem;
+                    border-radius: 22px;
+                }
+
+                .time {
+                    letter-spacing: 0.12em;
+                }
+
+                .date {
+                    letter-spacing: 0.16em;
+                }
+            }
+        </style>
+    </body>
+</html>
