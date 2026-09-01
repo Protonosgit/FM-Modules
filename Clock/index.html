@@ -1,146 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
-    </head>
-    <body>
-        <div class="clock" aria-live="polite">
-            <div class="time" id="time">00:00:00</div>
-            <div class="date" id="date">Monday, January 1, 2024</div>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clock Widget</title>
+    <style>
+      :root {
+        --bg-1: #020b10;
+        --bg-2: #0d1d2a;
+        --panel: rgba(9, 22, 31, 0.4);
+        --line: rgba(133, 234, 255, 0.24);
+        --text: #ecf9ff;
+        --muted: rgba(220, 240, 252, 0.72);
+        --glow: rgba(123, 213, 255, 0.48);
+      }
 
-        <script>
-            const timeEl = document.getElementById('time');
-            const dateEl = document.getElementById('date');
+      * {
+        box-sizing: border-box;
+      }
 
-            function updateClock() {
-                const now = new Date();
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-                timeEl.textContent = now.toLocaleTimeString('en-GB', {
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
+      body {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
 
-                dateEl.textContent = now.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
-            }
+      .clock {
+        position: relative;
+        width: min(100%, 540px);
+        padding: 1.5rem 1.75rem 1.1rem;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(10, 25, 34, 0.68), rgba(5, 15, 22, 0.34));
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 0 24px rgba(71, 175, 220, 0.16);
+        text-align: center;
+      }
 
-            updateClock();
-            setInterval(updateClock, 1000);
-        </script>
+      .clock::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border: 1px solid rgba(167, 235, 255, 0.14);
+        border-radius: 16px;
+        pointer-events: none;
+      }
 
-        <style>
-            :root {
-                --bg-1: #061018;
-                --bg-2: #0d1f2a;
-                --panel: rgba(10, 22, 30, 0.65);
-                --line: rgba(136, 244, 255, 0.25);
-                --text: #ebfbff;
-                --muted: rgba(214, 240, 252, 0.72);
-            }
+      .time,
+      .date {
+        position: relative;
+        z-index: 1;
+      }
 
-            * {
-                box-sizing: border-box;
-            }
+      .time {
+        font-size: clamp(2.3rem, 6vw, 4.7rem);
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-shadow: 0 0 12px var(--glow), 0 0 24px rgba(103, 214, 255, 0.4);
+      }
 
-            body {
-                margin: 0;
-                min-height: 100vh;
-                display: grid;
-                place-items: center;
-                background:
-                    radial-gradient(circle at center, rgba(26, 89, 104, 0.55), transparent 28%),
-                    linear-gradient(135deg, var(--bg-1), var(--bg-2));
-                color: var(--text);
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                overflow: hidden;
-            }
+      .date {
+        margin-top: 0.7rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
 
-            body::before {
-                content: '';
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-                background: linear-gradient(
-                    90deg,
-                    rgba(255,255,255,0.04),
-                    transparent 20%,
-                    transparent 80%,
-                    rgba(255,255,255,0.04)
-                );
-                transform: scaleY(1.2);
-            }
+      @media (max-width: 420px) {
+        .clock {
+          padding: 1.2rem 1rem 0.9rem;
+          border-radius: 18px;
+        }
 
-            .clock {
-                position: relative;
-                width: min(90vw, 560px);
-                padding: 2.2rem 2.5rem 1.8rem;
-                border: 1px solid var(--line);
-                border-radius: 28px;
-                background: rgba(10, 22, 30, 0.65);
-                backdrop-filter: blur(10px);
-                box-shadow:
-                    0 0 0 1px rgba(255,255,255,0.04),
-                    0 20px 50px rgba(0, 0, 0, 0.45),
-                    inset 0 0 30px rgba(120, 223, 255, 0.08),
-                    0 0 22px rgba(115, 214, 255, 0.16);
-                text-align: center;
-            }
+        .time {
+          letter-spacing: 0.08em;
+        }
 
-            .clock::before {
-                content: '';
-                position: absolute;
-                inset: 10px;
-                border: 1px solid rgba(182, 250, 255, 0.15);
-                border-radius: 20px;
-            }
+        .date {
+          letter-spacing: 0.12em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="clock" aria-live="polite">
+      <div class="time" id="time">00:00:00</div>
+      <div class="date" id="date">Monday, January 1, 2024</div>
+    </div>
 
-            .time {
-                position: relative;
-                z-index: 1;
-                font-size: clamp(2.6rem, 7vw, 5.4rem);
-                font-weight: 600;
-                letter-spacing: 0.18em;
-                text-transform: uppercase;
-                text-shadow:
-                    0 0 10px rgba(147, 234, 255, 0.7),
-                    0 0 20px rgba(103, 214, 255, 0.5);
-            }
+    <script>
+      const timeEl = document.getElementById('time');
+      const dateEl = document.getElementById('date');
 
-            .date {
-                position: relative;
-                z-index: 1;
-                margin-top: 0.8rem;
-                font-size: 0.8rem;
-                letter-spacing: 0.32em;
-                text-transform: uppercase;
-                color: var(--muted);
-                text-shadow: 0 0 12px rgba(151, 224, 255, 0.35);
-            }
+      const defaultParams = {
+        hour12: false,
+        showSeconds: true,
+        showDate: true,
+        timezone: 'local'
+      };
 
-            @media (max-width: 600px) {
-                .clock {
-                    padding: 1.8rem 1.4rem 1.5rem;
-                    border-radius: 22px;
-                }
+      function getTimeFormatter(params) {
+        const hour12 = Boolean(params.hour12);
+        const showSeconds = Boolean(params.showSeconds);
 
-                .time {
-                    letter-spacing: 0.12em;
-                }
+        return new Intl.DateTimeFormat('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: showSeconds ? '2-digit' : undefined,
+          hour12,
+          timeZone: params.timezone && params.timezone !== 'local' ? params.timezone : undefined
+        });
+      }
 
-                .date {
-                    letter-spacing: 0.16em;
-                }
-            }
-        </style>
-    </body>
+      function getDateFormatter(params) {
+        return new Intl.DateTimeFormat('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+          timeZone: params.timezone && params.timezone !== 'local' ? params.timezone : undefined
+        });
+      }
+
+      function updateClock(params) {
+        const now = new Date();
+        const timeFormatter = getTimeFormatter(params);
+        const dateFormatter = getDateFormatter(params);
+
+        timeEl.textContent = timeFormatter.format(now);
+
+        if (params.showDate !== false) {
+          dateEl.textContent = dateFormatter.format(now);
+        } else {
+          dateEl.textContent = '';
+        }
+      }
+
+      async function init() {
+        let params = { ...defaultParams };
+
+        if (window.mirror && typeof window.mirror.native?.getParams === 'function') {
+          try {
+            params = { ...defaultParams, ...(await window.mirror.native.getParams()) };
+          } catch (error) {
+            console.warn('Clock widget: failed to read params', error);
+          }
+        }
+
+        updateClock(params);
+        setInterval(() => updateClock(params), 1000);
+      }
+
+      init();
+
+      if (window.mirror && window.mirror.host) {
+        window.mirror.host.on('visibility', ({ visible }) => {
+          document.body.style.opacity = visible === false ? '0.5' : '1';
+        });
+      }
+    </script>
+  </body>
 </html>

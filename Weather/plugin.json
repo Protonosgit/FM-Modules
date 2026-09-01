@@ -1,0 +1,9 @@
+{
+  "widgetID": "com.protonos.weather",
+  "name": "Weather",
+  "author": "Protonos",
+  "source_link": "https://github.com/Protonosgit",
+  "description": "A weather forecast widget for the FantasticMirror display.",
+  "version": "1.0.0",
+  "permissions": ["webfetch"]
+}

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --accent: #6fb7ff;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 0.25em 0.35em;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #eee;
+  }
+
+  /* ---- shared bits ---- */
+  .meta {
+    font-size: clamp(10px, 1.8vw, 15px);
+    font-weight: 200;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .error, .loading {
+    margin: auto 0;
+    font-weight: 200;
+    font-size: clamp(12px, 2vw, 16px);
+    color: #888;
+  }
+
+  /* ---- cycle mode: one headline at a time ---- */
+  #cycle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    min-height: 0;
+  }
+  #cycle .title {
+    font-weight: 200;
+    font-size: clamp(18px, 4.2vw, 40px);
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  #cycle .meta {
+    margin-top: 0.4em;
+  }
+  #cycle .fade {
+    transition: opacity 0.5s ease;
+  }
+  #cycle .fade.hidden {
+    opacity: 0;
+  }
+
+  /* ---- list mode: several headlines ---- */
+  #list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55em;
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+  }
+  #list .item {
+    flex: none;
+    min-width: 0;
+  }
+  #list .title {
+    font-weight: 300;
+    font-size: clamp(13px, 2.6vw, 22px);
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  #list .desc {
+    margin-top: 0.15em;
+    font-weight: 200;
+    font-size: clamp(11px, 1.9vw, 15px);
+    color: #aaa;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  #list .meta {
+    margin-top: 0.15em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+  <div id="root" class="loading">Loading feed…</div>
+
+  <script>
+    // ---- Defaults (overridden by instance `params` in config.json) ----
+    const DEFAULTS = {
+      feedUrl: null,             // required — RSS or Atom feed URL
+      displayMode: 'cycle',      // 'cycle' | 'list'
+      maxItems: 8,               // items kept from the feed (list mode shows all of these; cycle mode rotates through them)
+      cycleSeconds: 8,           // cycle mode: seconds per headline
+      refreshMinutes: 15,        // how often to refetch the feed
+      showDate: true,
+      showSource: true,
+      showDescription: false,    // list mode only
+      descriptionMaxChars: 140,
+      locale: null,              // e.g. "en-US"; null = device locale
+      dateStyle: 'medium',       // 'full' | 'long' | 'medium' | 'short'
+      accentColor: '#6fb7ff'
+    };
+
+    let cfg = { ...DEFAULTS };
+    let items = [];
+    let cycleIndex = 0;
+    let cycleTimer = null;
+    const root = document.getElementById('root');
+
+    function applyStyle() {
+      document.documentElement.style.setProperty('--accent', cfg.accentColor || DEFAULTS.accentColor);
+    }
+
+    function stripHtml(str) {
+      if (!str) return '';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = str;
+      return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      try {
+        return new Intl.DateTimeFormat(cfg.locale || undefined, { dateStyle: cfg.dateStyle || 'medium' }).format(d);
+      } catch (e) {
+        return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(d);
+      }
+    }
+
+    function hostnameOf(link) {
+      try {
+        return new URL(link).hostname.replace(/^www\./, '');
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function parseFeedXML(xmlText) {
+      const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+      if (doc.querySelector('parsererror')) {
+        throw new Error('Feed XML could not be parsed');
+      }
+
+      const rssItems = Array.from(doc.querySelectorAll('item'));
+      if (rssItems.length) {
+        return rssItems.map(el => ({
+          title: (el.querySelector('title')?.textContent || '').trim(),
+          link: (el.querySelector('link')?.textContent || '').trim(),
+          date: (el.querySelector('pubDate')?.textContent || '').trim(),
+          description: stripHtml(el.querySelector('description')?.textContent || '')
+        }));
+      }
+
+      // Atom fallback
+      const entries = Array.from(doc.querySelectorAll('entry'));
+      return entries.map(el => {
+        const linkEl = el.querySelector('link[rel="alternate"]') || el.querySelector('link');
+        return {
+          title: (el.querySelector('title')?.textContent || '').trim(),
+          link: linkEl ? (linkEl.getAttribute('href') || '').trim() : '',
+          date: (el.querySelector('updated')?.textContent || el.querySelector('published')?.textContent || '').trim(),
+          description: stripHtml(el.querySelector('summary')?.textContent || el.querySelector('content')?.textContent || '')
+        };
+      });
+    }
+
+    function showMessage(text) {
+      root.className = 'error';
+      root.textContent = text;
+    }
+
+    async function loadFeed() {
+      if (!cfg.feedUrl) {
+        showMessage('No feedUrl set in params.');
+        return;
+      }
+      try {
+        const res = await window.mirror.native.webFetch(cfg.feedUrl);
+        if (res.status < 200 || res.status >= 300) {
+          throw new Error('HTTP ' + res.status);
+        }
+        const parsed = parseFeedXML(res.body).slice(0, cfg.maxItems);
+        if (!parsed.length) {
+          if (!items.length) showMessage('Feed loaded but contained no items.');
+          return;
+        }
+        items = parsed;
+        cycleIndex = 0;
+        render();
+      } catch (e) {
+        // Keep showing the last successfully-loaded items if we have any;
+        // only surface an error state on a cold start.
+        if (!items.length) {
+          const msg = String(e && e.message || e);
+          showMessage(
+            msg.includes('permission') ? "Needs the 'webfetch' permission." :
+            msg.includes('blocked') ? 'Feed host is blocked (needs localNetwork permission?).' :
+            'Could not load feed: ' + msg
+          );
+        }
+      }
+    }
+
+    function render() {
+      if (!items.length) return;
+      root.className = '';
+      if (cfg.displayMode === 'list') {
+        renderList();
+      } else {
+        renderCycle();
+      }
+    }
+
+    function itemMeta(item) {
+      const bits = [];
+      if (cfg.showSource) {
+        const src = hostnameOf(item.link);
+        if (src) bits.push(src);
+      }
+      if (cfg.showDate) {
+        const d = formatDate(item.date);
+        if (d) bits.push(d);
+      }
+      return bits.join(' · ');
+    }
+
+    function renderList() {
+      if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
+      root.innerHTML = '<div id="list"></div>';
+      const list = document.getElementById('list');
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = item.title || '(untitled)';
+        div.appendChild(title);
+
+        if (cfg.showDescription && item.description) {
+          const desc = document.createElement('div');
+          desc.className = 'desc';
+          const max = cfg.descriptionMaxChars || 140;
+          desc.textContent = item.description.length > max
+            ? item.description.slice(0, max).trim() + '…'
+            : item.description;
+          div.appendChild(desc);
+        }
+
+        const meta = itemMeta(item);
+        if (meta) {
+          const metaEl = document.createElement('div');
+          metaEl.className = 'meta';
+          metaEl.textContent = meta;
+          div.appendChild(metaEl);
+        }
+
+        list.appendChild(div);
+      });
+    }
+
+    function renderCycle() {
+      root.innerHTML = `
+        <div id="cycle">
+          <div class="title fade" id="cycleTitle"></div>
+          <div class="meta fade" id="cycleMeta"></div>
+        </div>`;
+      showCycleItem();
+      if (cycleTimer) clearInterval(cycleTimer);
+      cycleTimer = setInterval(() => {
+        cycleIndex = (cycleIndex + 1) % items.length;
+        swapCycleItem();
+      }, Math.max(2, cfg.cycleSeconds || 8) * 1000);
+    }
+
+    function showCycleItem() {
+      const item = items[cycleIndex];
+      const titleEl = document.getElementById('cycleTitle');
+      const metaEl = document.getElementById('cycleMeta');
+      if (!titleEl) return;
+      titleEl.textContent = item.title || '(untitled)';
+      metaEl.textContent = itemMeta(item);
+    }
+
+    function swapCycleItem() {
+      const titleEl = document.getElementById('cycleTitle');
+      const metaEl = document.getElementById('cycleMeta');
+      if (!titleEl) return;
+      titleEl.classList.add('hidden');
+      metaEl.classList.add('hidden');
+      setTimeout(() => {
+        showCycleItem();
+        titleEl.classList.remove('hidden');
+        metaEl.classList.remove('hidden');
+      }, 500);
+    }
+
+    async function init() {
+      try {
+        const params = await window.mirror.native.getParams();
+        cfg = { ...DEFAULTS, ...(params || {}) };
+      } catch (e) {
+        cfg = { ...DEFAULTS };
+      }
+      applyStyle();
+      await loadFeed();
+      setInterval(loadFeed, Math.max(1, cfg.refreshMinutes || 15) * 60 * 1000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

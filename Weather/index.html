@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="weather-widget" aria-live="polite">
+    <div class="header-row">
+      <div id="location" class="location" hidden></div>
+      <div id="updated" class="updated"></div>
+    </div>
+
+    <section class="current" aria-label="Current weather">
+      <div class="current-main">
+        <div id="current-icon" class="weather-icon" aria-hidden="true"></div>
+        <div id="current-temp" class="current-temp">--°</div>
+        <div class="metric metric-humidity"><span id="humidity" class="metric-value">--%</span></div>
+      </div>
+      <div class="metrics">
+        <div class="metric metric-range"><span id="high-low" class="metric-value"><span class="high">--°</span><span class="slash"> / </span><span class="low">--°</span></span></div>
+      </div>
+    </section>
+
+    <section class="forecast" id="forecast" aria-label="Forecast"></section>
+
+    <section class="info-box" id="additional" hidden>
+      <div id="additional-text" class="info-text"></div>
+    </section>
+
+    <div id="status" class="status" hidden></div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

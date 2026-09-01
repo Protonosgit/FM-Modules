@@ -1,0 +1,17 @@
+{
+  "widgetID": "com.protonos.weather",
+  "x": 0,
+  "y": 0,
+  "width": 4,
+  "height": 3,
+  "default_visible": true,
+  "params": {
+    "location": "Berlin, Germany",
+    "forecastDays": 5,
+    "showLocation": true,
+    "showAdditional": true,
+    "refreshMinutes": 15,
+    "temperatureUnit": "celsius",
+    "precipitationUnit": "mm"
+  }
+}

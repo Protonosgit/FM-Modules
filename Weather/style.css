@@ -1,0 +1,204 @@
+:root {
+  --fg: #f2f2f2;
+  --muted: rgba(242, 242, 242, 0.6);
+  --faint: rgba(242, 242, 242, 0.16);
+  --accent: #9fe7ff;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  color: var(--fg);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-weight: 350;
+}
+
+body { min-width: 0; min-height: 0; }
+
+.weather-widget {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  gap: clamp(6px, 1.3vh, 14px);
+  padding: clamp(8px, 2vw, 26px);
+  overflow: hidden;
+}
+
+.header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.location {
+  font-size: clamp(15px, 2.5vw, 32px);
+  letter-spacing: 0.03em;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.updated {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: clamp(9px, 1.1vw, 14px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.current {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: clamp(10px, 2vw, 24px);
+  min-width: 0;
+}
+
+.current-main {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.6vw, 20px);
+  min-width: 0;
+}
+
+.weather-icon {
+  width: clamp(38px, 8.5vw, 72px);
+  height: clamp(38px, 8.5vw, 72px);
+  flex: 0 0 auto;
+  color: var(--fg);
+  filter: drop-shadow(0 0 8px rgba(159, 231, 255, 0.13));
+}
+
+.weather-icon svg { width: 100%; height: 100%; display: block; }
+
+.current-temp {
+  font-size: clamp(52px, 9vw, 128px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.metrics {
+  display: flex;
+  gap: clamp(14px, 2.6vw, 36px);
+  align-items: center;
+  flex: 0 1 auto;
+}
+
+.metric {
+  display: grid;
+  gap: 4px;
+}
+
+.metric-humidity { text-align: left; }
+.metric-range { text-align: right; }
+
+.metric-label {
+  color: var(--muted);
+  font-size: clamp(9px, 1vw, 13px);
+  letter-spacing: 0.1em;
+}
+
+.metric-humidity .metric-value {
+  font-size: clamp(32px, 3.9vw, 54px);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.metric-range .metric-value {
+  font-size: clamp(28px, 2.9vw, 40px);
+  white-space: nowrap;
+}
+
+.high { font-size: 1em; }
+.low { font-size: 0.76em; opacity: 0.72; }
+.slash { opacity: 0.4; }
+
+.forecast {
+  min-height: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(72px, 1fr);
+  gap: clamp(6px, 1vw, 14px);
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.forecast-day {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(4px, 0.6vh, 8px);
+  padding: clamp(5px, 0.9vw, 10px) clamp(4px, 0.7vw, 8px);
+  text-align: center;
+  border-top: 1px solid var(--faint);
+}
+
+.day-name {
+  font-size: clamp(13px, 1.7vw, 22px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.day-icon {
+  width: clamp(26px, 5vw, 52px);
+  height: clamp(26px, 5vw, 52px);
+  margin: 0 auto;
+  color: var(--fg);
+}
+
+.day-icon svg { width: 100%; height: 100%; display: block; }
+
+.range {
+  display: flex;
+  min-height: 34px;
+  align-items: end;
+  justify-content: center;
+  gap: 5px;
+}
+
+.range-max { font-size: clamp(19px, 2.5vw, 30px); }
+.range-min { font-size: clamp(16px, 1.9vw, 24px); color: var(--muted); }
+
+.day-rain {
+  color: var(--muted);
+  font-size: clamp(14px, 1.3vw, 18px);
+}
+
+.info-box {
+  align-self: end;
+  padding-top: clamp(6px, 0.9vh, 10px);
+  border-top: 1px solid var(--faint);
+}
+
+.info-text {
+  font-size: clamp(18px, 1.8vw, 50px);
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  color: rgba(242, 242, 242, 0.55);
+  font-size: clamp(11px, 1.1vw, 14px);
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .weather-widget { padding: 8px; gap: 6px; }
+  .metrics { gap: 10px; }
+  .updated { display: none; }
+}

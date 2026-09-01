@@ -1,0 +1,22 @@
+{
+  "widgetID": "com.protonos.rssreader",
+  "x": 0,
+  "y": 0,
+  "width": 4,
+  "height": 2,
+  "default_visible": true,
+  "params": {
+    "feedUrl": "https://example.com/feed.xml",
+    "displayMode": "cycle",
+    "maxItems": 8,
+    "cycleSeconds": 8,
+    "refreshMinutes": 15,
+    "showDate": true,
+    "showSource": true,
+    "showDescription": false,
+    "descriptionMaxChars": 140,
+    "locale": "en-US",
+    "dateStyle": "medium",
+    "accentColor": "#6fb7ff"
+  }
+}

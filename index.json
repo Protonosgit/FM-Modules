@@ -1,4 +1,6 @@
 [
     "Clock",
-    "Calendar"
+    "Calendar",
+    "RSS",
+    "Weather"
 ]

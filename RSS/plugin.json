@@ -1,0 +1,9 @@
+{
+  "widgetID": "com.protonos.rssreader",
+  "name": "RSS Reader",
+  "author": "Protonos",
+  "source_link": "https://github.com/Protonosgit",
+  "description": "A minimal RSS feed reader for the FantasticMirror display.",
+  "version": "1.0.0",
+  "permissions": ["webfetch"]
+}
