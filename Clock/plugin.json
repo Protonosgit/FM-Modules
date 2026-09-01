@@ -1,0 +1,9 @@
+{
+  "widgetID": "basic_clock",
+  "name" : "Clock",
+  "author": "Protonos",
+  "description": "Original Collection",
+  "source_link": "https://github.com/Protonosgit/FM-Modules*",
+  "version": "1.0.0",
+  "permissions": [ ]
+}

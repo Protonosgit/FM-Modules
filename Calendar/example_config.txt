@@ -1,0 +1,8 @@
+  {
+    "widgetID": "basic_calendar",
+    "x": 0, 
+    "y": 0, 
+    "width": 3, 
+    "height": 3,
+    "params": {"first_day_of_week": 0, highlight_sunday: true}
+  }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar Widget</title>
+    <style>
+      :root {
+        --bg: #081922;
+        --panel: rgba(9, 24, 34, 0.9);
+        --panel-border: rgba(153, 224, 255, 0.18);
+        --text: #edf7ff;
+        --muted: rgba(237, 247, 255, 0.72);
+        --grid: rgba(255, 255, 255, 0.08);
+        --accent: #7dd3fc;
+        --today: #fbbf24;
+        --sunday: rgba(252, 110, 110, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top, rgba(125, 211, 252, 0.18), transparent 35%),
+          linear-gradient(135deg, var(--bg), #0c1f2a);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .calendar {
+        width: min(92vw, 420px);
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        padding: 18px 16px 14px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+      }
+
+      .month-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+
+      .weekdays,
+      .days {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .weekdays {
+        margin-bottom: 8px;
+      }
+
+      .weekday,
+      .day {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+      }
+
+      .weekday {
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .day {
+        position: relative;
+        border: 1px solid var(--grid);
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text);
+      }
+
+      .day.empty {
+        background: transparent;
+        border-color: transparent;
+      }
+
+      .day.sunday {
+        background: var(--sunday);
+        border-color: rgba(252, 110, 110, 0.25);
+      }
+
+      .day.today {
+        background: rgba(251, 191, 36, 0.2);
+        border-color: rgba(251, 191, 36, 0.8);
+        box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.8);
+      }
+
+      .day.today::after {
+        content: "";
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: var(--today);
+        border-radius: 50%;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="calendar" aria-live="polite">
+      <div class="month-header" id="month-header">Month Year</div>
+      <div class="weekdays" id="weekdays"></div>
+      <div class="days" id="days"></div>
+    </div>
+
+    <script>
+      const monthHeader = document.getElementById('month-header');
+      const weekdaysEl = document.getElementById('weekdays');
+      const daysEl = document.getElementById('days');
+
+      const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      function renderWeekdays() {
+        weekdaysEl.innerHTML = weekdayNames
+          .map((day) => `<div class="weekday">${day}</div>`)
+          .join('');
+      }
+
+      function renderCalendar() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+
+        const firstOfMonth = new Date(year, month, 1);
+        const lastOfMonth = new Date(year, month + 1, 0);
+        const startingOffset = firstOfMonth.getDay();
+        const totalDays = lastOfMonth.getDate();
+
+        monthHeader.textContent = new Intl.DateTimeFormat('en-US', {
+          month: 'long',
+          year: 'numeric'
+        }).format(now);
+
+        const cells = [];
+
+        for (let i = 0; i < startingOffset; i++) {
+          cells.push('<div class="day empty"></div>');
+        }
+
+        for (let day = 1; day <= totalDays; day++) {
+          const date = new Date(year, month, day);
+          const isSunday = date.getDay() === 0;
+          const isToday = date.toDateString() === now.toDateString();
+
+          let className = 'day';
+          if (isSunday) className += ' sunday';
+          if (isToday) className += ' today';
+
+          cells.push(`<div class="${className}">${day}</div>`);
+        }
+
+        while (cells.length % 7 !== 0) {
+          cells.push('<div class="day empty"></div>');
+        }
+
+        daysEl.innerHTML = cells.join('');
+      }
+
+      renderWeekdays();
+      renderCalendar();
+      setInterval(renderCalendar, 1000);
+    </script>
+  </body>
+</html>
