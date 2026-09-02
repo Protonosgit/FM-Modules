@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Carousel</title>
+		<style>
+			:root {
+				--accent: #7de2d1;
+				--text: #f2fbf8;
+				--muted: rgba(242, 251, 248, 0.58);
+			}
+
+			* { box-sizing: border-box; }
+
+			html, body {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				background: transparent;
+				color: var(--text);
+				font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+			}
+
+			body {
+				display: grid;
+				place-items: end center;
+				overflow: hidden;
+				padding: 0.45rem 0.7rem 0.65rem;
+				transition: opacity 240ms ease;
+			}
+
+			.indicator {
+				display: flex;
+				align-items: center;
+				gap: 0.42rem;
+				min-height: 1rem;
+				max-width: 100%;
+				color: var(--muted);
+			}
+
+			.dot {
+				width: 0.42rem;
+				height: 0.42rem;
+				flex: 0 0 auto;
+				border: 1px solid var(--accent);
+				border-radius: 50%;
+				opacity: 0.68;
+				transform: scale(0.82);
+				transition: opacity 260ms ease, transform 260ms ease, background-color 260ms ease;
+			}
+
+			.dot.active {
+				background: var(--accent);
+				opacity: 1;
+				transform: scale(1.2);
+				box-shadow: 0 0 0.55rem color-mix(in srgb, var(--accent) 72%, transparent);
+			}
+
+			.label {
+				max-width: 15rem;
+				overflow: hidden;
+				color: var(--muted);
+				font-size: 0.68rem;
+				letter-spacing: 0.12em;
+				line-height: 1;
+				text-overflow: ellipsis;
+				text-transform: uppercase;
+				white-space: nowrap;
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.dot, body { transition: none; }
+			}
+		</style>
+	</head>
+	<body>
+		<div class="indicator" id="indicator" aria-label="Carousel page"></div>
+
+		<script>
+			const DEFAULTS = {
+				pages: [
+					{ name: 'Page 1', widgets: [] },
+					{ name: 'Page 2', widgets: [] }
+				],
+				intervalSeconds: 30,
+				showLabel: false,
+				accentColor: '#7de2d1',
+				startPage: 0
+			};
+
+			const indicator = document.getElementById('indicator');
+			let config = { ...DEFAULTS };
+			let pages = [];
+			let currentPage = 0;
+			let timer = null;
+			let managedWidgets = new Set();
+
+			function normalisePages(value) {
+				if (!Array.isArray(value)) return [];
+				return value
+					.filter(page => page && Array.isArray(page.widgets))
+					.map((page, index) => ({
+						name: String(page.name || `Page ${index + 1}`),
+						widgets: page.widgets
+							.map(widgetIndex => String(widgetIndex))
+							.filter(widgetIndex => widgetIndex.length > 0)
+					}));
+			}
+
+			function renderIndicator() {
+				indicator.replaceChildren();
+				pages.forEach((page, index) => {
+					const dot = document.createElement('span');
+					dot.className = `dot${index === currentPage ? ' active' : ''}`;
+					dot.setAttribute('aria-label', page.name);
+					indicator.appendChild(dot);
+				});
+
+				if (config.showLabel && pages[currentPage]) {
+					const label = document.createElement('span');
+					label.className = 'label';
+					label.textContent = pages[currentPage].name;
+					indicator.appendChild(label);
+				}
+			}
+
+			async function getWidgetIndexes() {
+				if (!window.mirror?.native?.widgets?.list) return [];
+				try {
+					const instances = await window.mirror.native.widgets.list();
+					return instances.map(instance => String(instance.index));
+				} catch (error) {
+					console.warn('Carousel widget: failed to read widget list', error);
+					return [];
+				}
+			}
+
+			async function setPage(pageIndex) {
+				if (!pages.length || !window.mirror?.native?.widgets) return;
+				const nextPage = pages[pageIndex];
+				if (!nextPage) return;
+
+				const widgets = window.mirror.native.widgets;
+				const previousPage = pages[currentPage];
+				const toHide = previousPage ? previousPage.widgets : [];
+				await Promise.all(toHide.map(index => widgets.hide(index).catch(() => false)));
+				await Promise.all(nextPage.widgets.map(index => widgets.show(index).catch(() => false)));
+				currentPage = pageIndex;
+				renderIndicator();
+			}
+
+			function startTimer() {
+				window.clearInterval(timer);
+				if (pages.length < 2) return;
+				const interval = Math.max(1, Number(config.intervalSeconds) || DEFAULTS.intervalSeconds) * 1000;
+				timer = window.setInterval(() => {
+					setPage((currentPage + 1) % pages.length);
+				}, interval);
+			}
+
+			async function init() {
+				if (window.mirror?.native?.getParams) {
+					try {
+						config = { ...DEFAULTS, ...(await window.mirror.native.getParams()) };
+					} catch (error) {
+						console.warn('Carousel widget: failed to read params', error);
+					}
+				}
+
+				pages = normalisePages(config.pages);
+				currentPage = Math.min(Math.max(0, Number(config.startPage) || 0), Math.max(0, pages.length - 1));
+				document.documentElement.style.setProperty('--accent', config.accentColor || DEFAULTS.accentColor);
+				renderIndicator();
+
+				const availableWidgets = await getWidgetIndexes();
+				managedWidgets = new Set(pages.flatMap(page => page.widgets));
+				managedWidgets.forEach(index => {
+					if (!availableWidgets.includes(index)) console.warn(`Carousel widget: unknown widget index ${index}`);
+				});
+
+				await setPage(currentPage);
+				startTimer();
+			}
+
+			init();
+
+			window.mirror?.host?.on('visibility', ({ visible }) => {
+				document.body.style.opacity = visible === false ? '0.45' : '1';
+				if (visible === false) window.clearInterval(timer);
+				else startTimer();
+			});
+		</script>
+	</body>
+</html>

@@ -7,7 +7,7 @@
   "default_visible": true,
   "params": {
     "feedUrl": "https://example.com/feed.xml",
-    "displayMode": "cycle",
+    "displayMode": "cycle", // 'cycle' | 'list'
     "maxItems": 8,
     "cycleSeconds": 8,
     "refreshMinutes": 15,
@@ -16,7 +16,7 @@
     "showDescription": false,
     "descriptionMaxChars": 140,
     "locale": "en-US",
-    "dateStyle": "medium",
+    "dateStyle": "medium", // 'full' | 'long' | 'medium' | 'short'
     "accentColor": "#6fb7ff"
   }
 }

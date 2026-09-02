@@ -1,0 +1,18 @@
+{
+	"widgetID": "com.protonos.carousel",
+	"x": 0,
+	"y": 0,
+	"width": 2,
+	"height": 1,
+	"default_visible": true,
+	"params": {
+		"intervalSeconds": 30,
+		"showLabel": true,
+		"accentColor": "#7de2d1",
+		"startPage": 0,
+		"pages": [
+			{ "name": "Overview", "widgets": ["1", "2"] },
+			{ "name": "Details", "widgets": ["3", "4"] }
+		]
+	}
+}

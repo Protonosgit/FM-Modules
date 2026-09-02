@@ -1,0 +1,9 @@
+{
+	"widgetID": "com.protonos.carousel",
+	"name": "Carousel",
+	"author": "Protonos",
+	"description": "Cycles groups of widgets through configurable pages.",
+	"source_link": "https://github.com/Protonosgit/FM-Modules",
+	"version": "1.0.0",
+	"permissions": ["mirror_management"]
+}
