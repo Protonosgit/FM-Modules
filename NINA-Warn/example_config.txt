@@ -1,0 +1,19 @@
+{
+	"widgetID": "com.fantasticmirror.nina-warn",
+	"x": 0,
+	"y": 0,
+	"width": 8,
+	"height": 5,
+	"default_visible": true,
+	"params": {
+		"ags": ["105180000000"],
+		"maxAgeInHours": 6,
+		"maxWarnings": 5,
+		"updateIntervalInSeconds": 120,
+		"showCity": true,
+		"showDate": true,
+		"showNoWarning": false,
+		"notifyOnInitial": false,
+		"notificationTone": true
+	}
+}

@@ -1,0 +1,9 @@
+{
+	"widgetID": "com.fantasticmirror.nina-warn",
+	"name": "NINA Warn",
+	"author": "Protonos",
+	"source_link": "https://github.com/Protonosgit/FM-Modules",
+	"description": "Glanceable German civil protection warnings with tone and dialog notifications.",
+	"version": "1.0.0",
+	"permissions": ["dialog", "webfetch"]
+}
