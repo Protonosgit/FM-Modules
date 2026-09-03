@@ -1,9 +1,7 @@
 {
   "widgetID": "com.protonos.calendar",
-  "x": 0,
-  "y": 0,
-  "width": 3,
-  "height": 3,
+  "row": 0,
+  "column":0,
   "default_visible": true,
   "params": {
     "first_day_of_week": 0,

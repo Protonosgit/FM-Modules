@@ -1,10 +1,7 @@
 {
 	"widgetID": "com.protonos.carousel",
-	"x": 0,
-	"y": 0,
-	"width": 2,
-	"height": 1,
-	"default_visible": true,
+    "row": 0,
+    "column":0,
 	"params": {
 		"intervalSeconds": 30,
 		"showLabel": true,

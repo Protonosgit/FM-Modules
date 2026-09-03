@@ -1,9 +1,7 @@
 {
 	"widgetID": "com.fantasticmirror.nina-warn",
-	"x": 0,
-	"y": 0,
-	"width": 8,
-	"height": 5,
+ 	"row": 0,
+ 	"column":0,
 	"default_visible": true,
 	"params": {
 		"ags": ["105180000000"],

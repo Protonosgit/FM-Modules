@@ -3,7 +3,7 @@
 	"name": "NINA Warn",
 	"author": "Protonos",
 	"source_link": "https://github.com/Protonosgit/FM-Modules",
-	"description": "Glanceable German civil protection warnings with tone and dialog notifications.",
+	"description": "German civil protection warnings with notifications.",
 	"version": "1.0.0",
 	"permissions": ["dialog", "webfetch"]
 }

@@ -1,9 +1,7 @@
 {
   "widgetID": "com.protonos.rssreader",
-  "x": 0,
-  "y": 0,
-  "width": 4,
-  "height": 2,
+ 	"row": 0,
+ 	"column":0,
   "default_visible": true,
   "params": {
     "feedUrl": "https://example.com/feed.xml",
