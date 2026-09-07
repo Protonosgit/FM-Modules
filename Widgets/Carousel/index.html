@@ -85,6 +85,7 @@
 				],
 				intervalSeconds: 30,
 				showLabel: false,
+				hideWidgets: true,
 				accentColor: '#7de2d1',
 				startPage: 0
 			};
@@ -95,6 +96,7 @@
 			let currentPage = 0;
 			let timer = null;
 			let managedWidgets = new Set();
+			let visibleWidgets = new Set();
 			let targetPage = 0;
 			let requestedPage = null;
 			let transitionPromise = null;
@@ -140,7 +142,7 @@
 			}
 
 			function setPage(pageIndex) {
-				if (!pages.length || !window.mirror?.native?.widgets) return Promise.resolve();
+				if (!pages.length || !config.hideWidgets || !window.mirror?.native?.widgets) return Promise.resolve();
 				if (!pages[pageIndex]) return Promise.resolve();
 
 				targetPage = pageIndex;
@@ -153,11 +155,15 @@
 						const nextPageIndex = requestedPage;
 						requestedPage = null;
 						const nextPage = pages[nextPageIndex];
+						const nextWidgets = new Set(nextPage.widgets);
+						const widgetsToHide = [...visibleWidgets].filter(index => !nextWidgets.has(index));
+						const widgetsToShow = [...nextWidgets].filter(index => !visibleWidgets.has(index));
 
 						await Promise.all(
-							[...managedWidgets].map(index => widgets.hide(index).catch(() => false))
+							widgetsToHide.map(index => widgets.hide(index).catch(() => false))
 						);
-						await Promise.all(nextPage.widgets.map(index => widgets.show(index).catch(() => false)));
+						await Promise.all(widgetsToShow.map(index => widgets.show(index).catch(() => false)));
+						visibleWidgets = nextWidgets;
 						currentPage = nextPageIndex;
 						renderIndicator();
 					}
@@ -200,7 +206,14 @@
 					if (!availableWidgets.includes(index)) console.warn(`Carousel widget: unknown widget index ${index}`);
 				});
 
-				await setPage(currentPage);
+				if (config.hideWidgets) {
+					visibleWidgets = new Set();
+					await Promise.all(
+						[...managedWidgets].filter(index => !pages[currentPage].widgets.includes(index))
+							.map(index => window.mirror.native.widgets.hide(index).catch(() => false))
+					);
+					await setPage(currentPage);
+				}
 				startTimer();
 			}
 

@@ -5,6 +5,7 @@
 	"params": {
 		"intervalSeconds": 30,
 		"showLabel": true,
+		"hideWidgets": true,
 		"accentColor": "#7de2d1",
 		"startPage": 0,
 		"pages": [
