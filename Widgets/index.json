@@ -1,6 +1,7 @@
 [
     "Clock",
     "Calendar",
-    "RSS",
-    "Weather"
+    "RSS_Reader",
+    "Weather",
+    "Carousel"
 ]

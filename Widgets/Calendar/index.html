@@ -6,13 +6,11 @@
     <title>Calendar Widget</title>
     <style>
       :root {
-        --panel: rgba(10, 23, 31, 0.52);
-        --panel-border: rgba(149, 228, 255, 0.2);
-        --text: #edf7ff;
-        --muted: rgba(237, 247, 255, 0.72);
-        --grid: rgba(255, 255, 255, 0.08);
-        --today: #fbbf24;
-        --sunday: rgba(252, 110, 110, 0.14);
+        --text: #f4f8f5;
+        --muted: rgba(244, 248, 245, 0.62);
+        --faint: rgba(244, 248, 245, 0.11);
+        --accent: #f3b562;
+        --sunday: #e88989;
       }
 
       * {
@@ -26,7 +24,7 @@
         height: 100%;
         background: transparent;
         color: var(--text);
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
       }
 
       body {
@@ -36,24 +34,39 @@
       }
 
       .calendar {
-        width: min(100%, 420px);
-        padding: 1rem 0.9rem 0.85rem;
-        background: linear-gradient(180deg, rgba(10, 25, 34, 0.7), rgba(5, 14, 20, 0.34));
-        border: 1px solid var(--panel-border);
-        border-radius: 18px;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 0 24px rgba(71, 175, 220, 0.12);
+        width: min(100%, 28rem);
+        padding: clamp(0.35rem, 2.4vw, 1rem);
+      }
+
+      .calendar-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 0 0 clamp(0.6rem, 2vw, 1rem);
+        border-bottom: 1px solid var(--faint);
+        padding-bottom: 0.55rem;
       }
 
       .month-header {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 0.7rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
+        min-width: 0;
+        font-size: clamp(1rem, 5vw, 1.45rem);
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        line-height: 1.1;
+        overflow: hidden;
+        text-overflow: ellipsis;
         text-transform: uppercase;
-        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .today-label {
+        flex: 0 0 auto;
+        color: var(--accent);
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
       }
 
       .weekdays,
@@ -64,7 +77,7 @@
       }
 
       .weekdays {
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.3rem;
       }
 
       .weekday,
@@ -72,23 +85,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 2.3rem;
-        border-radius: 0.6rem;
-        font-size: 0.7rem;
+        min-height: clamp(1.55rem, 7vw, 2.5rem);
+        border-radius: 0.25rem;
+        font-size: clamp(0.58rem, 2.1vw, 0.72rem);
       }
 
       .weekday {
         color: var(--muted);
         font-weight: 600;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
       .day {
         position: relative;
-        border: 1px solid var(--grid);
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid transparent;
         color: var(--text);
+        font-size: clamp(0.72rem, 3vw, 0.92rem);
+        font-variant-numeric: tabular-nums;
       }
 
       .day.empty {
@@ -97,24 +111,23 @@
       }
 
       .day.sunday {
-        background: var(--sunday);
-        border-color: rgba(252, 110, 110, 0.25);
+        color: var(--sunday);
       }
 
       .day.today {
-        background: rgba(251, 191, 36, 0.18);
-        border-color: rgba(251, 191, 36, 0.8);
-        box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.8);
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 700;
       }
 
       .day.today::after {
         content: "";
         position: absolute;
-        width: 0.38rem;
-        height: 0.38rem;
-        background: var(--today);
+        width: 0.28rem;
+        height: 0.28rem;
+        background: var(--accent);
         border-radius: 50%;
-        bottom: 0.38rem;
+        bottom: 0.2rem;
         left: 50%;
         transform: translateX(-50%);
       }
@@ -122,13 +135,17 @@
   </head>
   <body>
     <div class="calendar" aria-live="polite">
-      <div class="month-header" id="month-header">Month Year</div>
+      <div class="calendar-heading">
+        <div class="month-header" id="month-header">Month Year</div>
+        <div class="today-label" id="today-label">Today</div>
+      </div>
       <div class="weekdays" id="weekdays"></div>
       <div class="days" id="days"></div>
     </div>
 
     <script>
       const monthHeader = document.getElementById('month-header');
+      const todayLabel = document.getElementById('today-label');
       const weekdaysEl = document.getElementById('weekdays');
       const daysEl = document.getElementById('days');
 
@@ -142,17 +159,6 @@
 
       const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-      function getParams() {
-        if (window.mirror && typeof window.mirror.native?.getParams === 'function') {
-          try {
-            return { ...defaultParams, ...(window.mirror.native.getParams ? null : {}) };
-          } catch (error) {
-            console.warn('Calendar widget: failed to read params', error);
-          }
-        }
-        return { ...defaultParams };
-      }
-
       async function init() {
         let params = { ...defaultParams };
 
@@ -165,11 +171,15 @@
         }
 
         const locale = params.locale || defaultParams.locale;
-        const firstDay = Number.isInteger(params.first_day_of_week) ? params.first_day_of_week : defaultParams.first_day_of_week;
+        const requestedFirstDay = Number(params.first_day_of_week);
+        const firstDay = Number.isInteger(requestedFirstDay) && requestedFirstDay >= 0 && requestedFirstDay <= 6
+          ? requestedFirstDay
+          : defaultParams.first_day_of_week;
+        params.timezone = params.timezone && params.timezone !== 'local' ? params.timezone : undefined;
         const orderedWeekdays = [...weekdays.slice(firstDay), ...weekdays.slice(0, firstDay)];
 
         weekdaysEl.innerHTML = orderedWeekdays
-          .map((day) => `<div class="weekday">${day}</div>`)
+          .map((day) => `<div class="weekday" aria-hidden="true">${day}</div>`)
           .join('');
 
         renderCalendar(params, locale, firstDay);
@@ -178,19 +188,24 @@
 
       function renderCalendar(params, locale, firstDay) {
         const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth();
+        const dateParts = new Intl.DateTimeFormat('en-CA', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          timeZone: params.timezone
+        }).formatToParts(now);
+        const year = Number(dateParts.find((part) => part.type === 'year').value);
+        const month = Number(dateParts.find((part) => part.type === 'month').value) - 1;
+        const today = Number(dateParts.find((part) => part.type === 'day').value);
 
-        const firstOfMonth = new Date(year, month, 1);
-        const lastOfMonth = new Date(year, month + 1, 0);
-        const totalDays = lastOfMonth.getDate();
-        const firstWeekdayIndex = firstOfMonth.getDay();
+        const totalDays = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+        const firstWeekdayIndex = new Date(Date.UTC(year, month, 1)).getUTCDay();
         const cells = [];
 
         const monthLabel = new Intl.DateTimeFormat(locale, {
           month: 'long',
           year: 'numeric',
-          timeZone: params.timezone && params.timezone !== 'local' ? params.timezone : undefined
+          timeZone: params.timezone
         }).format(now);
 
         if (params.show_month_name !== false) {
@@ -198,6 +213,11 @@
         } else {
           monthHeader.textContent = '';
         }
+        todayLabel.textContent = new Intl.DateTimeFormat(locale, {
+          month: 'short',
+          day: 'numeric',
+          timeZone: params.timezone
+        }).format(now);
 
         const leadingOffset = (firstWeekdayIndex - firstDay + 7) % 7;
         for (let i = 0; i < leadingOffset; i++) {
@@ -205,9 +225,9 @@
         }
 
         for (let day = 1; day <= totalDays; day++) {
-          const date = new Date(year, month, day);
-          const isSunday = date.getDay() === 0;
-          const isToday = date.toDateString() === now.toDateString();
+          const weekdayIndex = new Date(Date.UTC(year, month, day)).getUTCDay();
+          const isSunday = weekdayIndex === 0;
+          const isToday = day === today;
 
           let className = 'day';
           if (params.highlight_sunday !== false && isSunday) className += ' sunday';

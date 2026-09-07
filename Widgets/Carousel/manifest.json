@@ -1,5 +1,5 @@
 {
-	"widgetID": "com.protonos.carousel",
+	"widgetID": "basic.carousel",
 	"name": "Carousel",
 	"author": "Protonos",
 	"description": "Cycles groups of widgets through configurable pages.",

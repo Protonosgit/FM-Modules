@@ -1,5 +1,5 @@
 {
-  "widgetID": "com.protonos.clock",
+  "widgetID": "basic.clock",
   "row": 0,
   "column":0,
   "default_visible": true,

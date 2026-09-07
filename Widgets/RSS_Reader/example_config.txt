@@ -1,5 +1,5 @@
 {
-  "widgetID": "com.protonos.rssreader",
+  "widgetID": "basic.rssreader",
  	"row": 0,
  	"column":0,
   "default_visible": true,

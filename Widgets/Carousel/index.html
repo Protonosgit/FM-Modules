@@ -95,6 +95,9 @@
 			let currentPage = 0;
 			let timer = null;
 			let managedWidgets = new Set();
+			let targetPage = 0;
+			let requestedPage = null;
+			let transitionPromise = null;
 
 			function normalisePages(value) {
 				if (!Array.isArray(value)) return [];
@@ -136,18 +139,35 @@
 				}
 			}
 
-			async function setPage(pageIndex) {
-				if (!pages.length || !window.mirror?.native?.widgets) return;
-				const nextPage = pages[pageIndex];
-				if (!nextPage) return;
+			function setPage(pageIndex) {
+				if (!pages.length || !window.mirror?.native?.widgets) return Promise.resolve();
+				if (!pages[pageIndex]) return Promise.resolve();
+
+				targetPage = pageIndex;
+				requestedPage = pageIndex;
+				if (transitionPromise) return transitionPromise;
 
 				const widgets = window.mirror.native.widgets;
-				const previousPage = pages[currentPage];
-				const toHide = previousPage ? previousPage.widgets : [];
-				await Promise.all(toHide.map(index => widgets.hide(index).catch(() => false)));
-				await Promise.all(nextPage.widgets.map(index => widgets.show(index).catch(() => false)));
-				currentPage = pageIndex;
-				renderIndicator();
+				transitionPromise = (async () => {
+					while (requestedPage !== null) {
+						const nextPageIndex = requestedPage;
+						requestedPage = null;
+						const nextPage = pages[nextPageIndex];
+
+						await Promise.all(
+							[...managedWidgets].map(index => widgets.hide(index).catch(() => false))
+						);
+						await Promise.all(nextPage.widgets.map(index => widgets.show(index).catch(() => false)));
+						currentPage = nextPageIndex;
+						renderIndicator();
+					}
+				})()
+					.catch(error => console.warn('Carousel widget: failed to switch page', error))
+					.finally(() => {
+						transitionPromise = null;
+					});
+
+				return transitionPromise;
 			}
 
 			function startTimer() {
@@ -155,7 +175,7 @@
 				if (pages.length < 2) return;
 				const interval = Math.max(1, Number(config.intervalSeconds) || DEFAULTS.intervalSeconds) * 1000;
 				timer = window.setInterval(() => {
-					setPage((currentPage + 1) % pages.length);
+					setPage((targetPage + 1) % pages.length);
 				}, interval);
 			}
 
@@ -170,6 +190,7 @@
 
 				pages = normalisePages(config.pages);
 				currentPage = Math.min(Math.max(0, Number(config.startPage) || 0), Math.max(0, pages.length - 1));
+				targetPage = currentPage;
 				document.documentElement.style.setProperty('--accent', config.accentColor || DEFAULTS.accentColor);
 				renderIndicator();
 

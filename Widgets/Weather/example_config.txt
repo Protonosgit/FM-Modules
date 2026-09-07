@@ -1,5 +1,5 @@
 {
-  "widgetID": "com.protonos.weather",
+  "widgetID": "basic.weather",
  	"row": 0,
  	"column":0,
   "default_visible": true,

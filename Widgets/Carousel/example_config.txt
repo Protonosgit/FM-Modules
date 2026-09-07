@@ -1,5 +1,5 @@
 {
-	"widgetID": "com.protonos.carousel",
+	"widgetID": "basic.carousel",
     "row": 0,
     "column":0,
 	"params": {
