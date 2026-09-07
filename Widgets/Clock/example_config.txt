@@ -8,6 +8,9 @@
     "showSeconds": true,
     "showDate": true,
     "dateFormat": "long",
-    "timezone": "local"
+    "timezone": "local",
+    "timeColor": "#ffffff",
+    "dateColor": "#aaaaaa",
+    "dotsColor": "#ffffff"
   }
 }

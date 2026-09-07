@@ -16,7 +16,7 @@
         width: 100%;
         height: 100%;
         background: transparent;
-        color: #ffffff;
+        color: var(--time-color);
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       }
 
@@ -36,13 +36,26 @@
         font-size: clamp(1.5rem, 12vw, 4.5rem);
         font-weight: 400;
         line-height: 1.1;
+        color: var(--time-color);
         white-space: nowrap;
+      }
+
+      .blink-dots {
+        color: var(--dots-color);
+        animation: blink 1s steps(1, end) infinite;
       }
 
       .date {
         margin-top: 0.25rem;
         font-size: clamp(0.75rem, 3.5vw, 1.25rem);
+        color: var(--date-color);
         line-height: 1.2;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
       }
     </style>
   </head>
@@ -61,7 +74,10 @@
         showSeconds: true,
         showDate: true,
         dateFormat: 'long',
-        timezone: 'local'
+        timezone: 'local',
+        timeColor: '#ffffff',
+        dateColor: '#aaaaaa',
+        dotsColor: '#ffffff'
       };
 
       let updateTimer;
@@ -74,13 +90,25 @@
       }
 
       function normalizeParams(params) {
+        const colorOrDefault = (value, fallback) =>
+          typeof value === 'string' && value.trim() ? value.trim() : fallback;
+
         return {
           ...defaultParams,
           ...params,
           hour12: isEnabled(params.hour12, defaultParams.hour12),
           showSeconds: isEnabled(params.showSeconds, defaultParams.showSeconds),
-          showDate: isEnabled(params.showDate, defaultParams.showDate)
+          showDate: isEnabled(params.showDate, defaultParams.showDate),
+          timeColor: colorOrDefault(params.timeColor, defaultParams.timeColor),
+          dateColor: colorOrDefault(params.dateColor, defaultParams.dateColor),
+          dotsColor: colorOrDefault(params.dotsColor, defaultParams.dotsColor)
         };
+      }
+
+      function applyColors(params) {
+        document.documentElement.style.setProperty('--time-color', params.timeColor);
+        document.documentElement.style.setProperty('--date-color', params.dateColor);
+        document.documentElement.style.setProperty('--dots-color', params.dotsColor);
       }
 
       function getTimeFormatter(params) {
@@ -111,7 +139,24 @@
         const timeFormatter = getTimeFormatter(params);
         const dateFormatter = getDateFormatter(params);
 
-        timeEl.textContent = timeFormatter.format(now);
+        timeEl.replaceChildren();
+        timeFormatter.formatToParts(now).forEach((part) => {
+          if (part.type !== 'literal' || !part.value.includes(':')) {
+            timeEl.appendChild(document.createTextNode(part.value));
+            return;
+          }
+
+          const literalParts = part.value.split(':');
+          literalParts.forEach((literal, index) => {
+            if (literal) timeEl.appendChild(document.createTextNode(literal));
+            if (index < literalParts.length - 1) {
+              const dots = document.createElement('span');
+              dots.className = 'blink-dots';
+              dots.textContent = ':';
+              timeEl.appendChild(dots);
+            }
+          });
+        });
 
         if (params.showDate !== false) {
           dateEl.textContent = dateFormatter.format(now);
@@ -143,6 +188,7 @@
         }
 
         clockParams = normalizeParams(params);
+        applyColors(clockParams);
         startUpdates();
       }
 
