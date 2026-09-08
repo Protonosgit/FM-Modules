@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Embed Widget</title>
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+
+			html,
+			body {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				background: transparent;
+				color: #ffffff;
+				font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+			}
+
+			body {
+				overflow: hidden;
+			}
+
+			.embed-frame {
+				display: block;
+				width: 100%;
+				height: 100%;
+				border: 0;
+			}
+
+			.message {
+				display: grid;
+				width: 100%;
+				height: 100%;
+				place-items: center;
+				padding: 1rem;
+				color: #bdbdbd;
+				font-size: clamp(0.8rem, 2vw, 1.1rem);
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="message" id="message" role="status" hidden></div>
+		<iframe
+			class="embed-frame"
+			id="embed-frame"
+			title="Embedded content"
+			loading="eager"
+			referrerpolicy="no-referrer"
+		></iframe>
+
+		<script>
+			const frame = document.getElementById('embed-frame');
+			const message = document.getElementById('message');
+
+			function showMessage(text) {
+				frame.hidden = true;
+				message.hidden = false;
+				message.textContent = text;
+			}
+
+			function normalizeUrl(value) {
+				if (typeof value !== 'string' || !value.trim()) return null;
+
+				try {
+					const url = new URL(value.trim());
+					return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+				} catch (error) {
+					return null;
+				}
+			}
+
+			async function init() {
+				let params = {};
+
+				if (window.mirror && typeof window.mirror.native?.getParams === 'function') {
+					try {
+						params = (await window.mirror.native.getParams()) || {};
+					} catch (error) {
+						console.warn('Embed widget: failed to read params', error);
+					}
+				}
+
+				const url = normalizeUrl(params.url);
+				if (!url) {
+					showMessage('Configure a valid http(s) URL for this embed.');
+					return;
+				}
+
+				frame.src = url;
+			}
+
+			init();
+		</script>
+	</body>
+</html>

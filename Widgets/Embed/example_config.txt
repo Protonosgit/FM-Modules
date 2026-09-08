@@ -1,0 +1,10 @@
+{
+	"widgetID": "basic.embed",
+	"row": 0,
+	"column": 0,
+	"rowSpan": 1,
+	"columnSpan": 1,
+	"params": {
+		"url": "https://example.com/"
+	}
+}

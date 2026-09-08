@@ -1,0 +1,9 @@
+{
+	"widgetID": "basic.embed",
+	"name": "Embed",
+	"author": "Protonos",
+	"description": "Embeds a configured URL inside the widget.",
+	"source_link": "https://github.com/Protonosgit/FM-Modules",
+	"version": "1.0.0",
+	"permissions": []
+}
