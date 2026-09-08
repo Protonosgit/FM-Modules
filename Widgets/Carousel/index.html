@@ -142,11 +142,16 @@
 			}
 
 			function setPage(pageIndex) {
-				if (!pages.length || !config.hideWidgets || !window.mirror?.native?.widgets) return Promise.resolve();
+				if (!pages.length) return Promise.resolve();
 				if (!pages[pageIndex]) return Promise.resolve();
 
 				targetPage = pageIndex;
 				requestedPage = pageIndex;
+				if (!config.hideWidgets || !window.mirror?.native?.widgets) {
+					currentPage = pageIndex;
+					renderIndicator();
+					return Promise.resolve();
+				}
 				if (transitionPromise) return transitionPromise;
 
 				const widgets = window.mirror.native.widgets;
@@ -178,11 +183,20 @@
 
 			function startTimer() {
 				window.clearInterval(timer);
-				if (pages.length < 2) return;
-				const interval = Math.max(1, Number(config.intervalSeconds) || DEFAULTS.intervalSeconds) * 1000;
+				const intervalSeconds = Number(config.intervalSeconds);
+				if (pages.length < 2 || !Number.isFinite(intervalSeconds) || intervalSeconds <= 0) return;
+				const interval = intervalSeconds * 1000;
 				timer = window.setInterval(() => {
 					setPage((targetPage + 1) % pages.length);
 				}, interval);
+			}
+
+			function handlePageRequest(payload) {
+				const value = payload && typeof payload === 'object'
+					? (payload.pageIndex ?? payload.page)
+					: payload;
+				const pageIndex = Number(value);
+				if (Number.isInteger(pageIndex) && pages[pageIndex]) setPage(pageIndex);
 			}
 
 			async function init() {
@@ -219,6 +233,7 @@
 
 			init();
 
+			window.mirror?.host?.on('carousel:set-page', handlePageRequest);
 			window.mirror?.host?.on('visibility', ({ visible }) => {
 				document.body.style.opacity = visible === false ? '0.45' : '1';
 				if (visible === false) window.clearInterval(timer);

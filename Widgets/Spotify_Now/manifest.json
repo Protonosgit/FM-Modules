@@ -1,0 +1,9 @@
+{
+	"widgetID": "spotify.now-playing",
+	"name": "Spotify Now Playing",
+	"author": "Protonos",
+	"source_link": "https://github.com/Protonosgit/FM-Modules",
+	"description": "Shows the currently playing Spotify track with cover art, album, title, artist, and progress.",
+	"version": "1.0.0",
+	"permissions": ["webfetch", "local_network"]
+}
